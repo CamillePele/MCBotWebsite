@@ -1,0 +1,40 @@
+extends layout
+
+block content
+  //p Welcome toto #{title}
+
+  style.
+    .player-head {
+      display: inline;
+    }
+
+
+  .mx-auto(style='width: 200px;')
+    h1 MCBot
+
+  .mx-auto
+    table.table
+      thead.thead-dark
+        tr
+          th(scope='col') #
+          th(scope='col') Pseudo
+          th(scope='col') Statut
+          th(scope='col') Action
+      tbody
+        each val in clients
+          tr
+            th(scope='row')=val['ID']
+            td
+              .player-head
+                img.rounded(src = 'https://minotar.net/helm/'+ val['username'] +'/50.png', alt = 'tete du joueur')
+                p=val['username']
+            if val['online'] === undefined || val['online'] === false
+              td
+                .text-danger Offline
+              td
+                button.btn.btn-success(onclick="location.href='http://localhost:8080/connect/"+val['username']+"'", type='button') Connecté
+            else
+              td
+                .text-success Online
+              td
+                button.btn.btn-danger(onclick="location.href='http://localhost:8080/disconnect/"+val['username']+"'", type='button') Déconnecter
