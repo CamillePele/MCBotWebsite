@@ -1,54 +1,30 @@
 var express = require('express');
 var router = express.Router();
-var mysql = require('mysql');
 var minecraft = require('../minecraft');
+var fs = require('fs');
 
-const mc = require('minecraft-protocol');
+let rawdata = fs.readFileSync('clients.json');
+const clients = JSON.parse(rawdata);
 
-var con = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "mcbot"
-});
+//console.log(clients[0]['mail']);
 
-const clientsList = [];
+const instancesList = [];
 
 /* GET client list */
-function getClients(callback) {
-    var clients = Array();
-    con.query("SELECT * FROM clients", function (err, result) {
-        if (err) console.log(err);
 
-        if (result)
-            result.forEach(function (element) {
-                clients.push(element);
-            });
-        return callback(clients)
-    });
-}
-
-function getClientInfo(username, callback) {
-    con.query("SELECT * FROM clients WHERE username = '"+username+"'", function (err, result) {
-        if (err) console.log(err);
-        return callback(result)
-    });
+function getClientInfo(username) {
+    for(var i in clients){
+        if(clients[i].username === username)
+            return clients[i]
+    }
 }
 
 function connectClient(username){
-    getClientInfo(username, function (client) {
-        if (!clientsList[client[0]['username']])
-            clientsList[client[0]['username']] = new minecraft(client[0]['username'], client[0]['mail'], client[0]['password']);
-        clientsList[username].connect();
-    });
-    con.query("UPDATE clients SET lastConnect = '"+new Date().toISOString()+"' WHERE username = '"+username+"'", function (err, result) {
-        if (err) console.log(err);
-    });
+    let client = getClientInfo(username);
+    if (!instancesList[client.username])
+        instancesList[client.username] = new minecraft(client.username, client.mail, client.password);
+    instancesList[username].connect();
 
-}
-
-function disconnectClient(username){
-    delete clientsList[username];
 }
 
 router.get('/connect/:username', function(req, res, next) {
@@ -59,26 +35,22 @@ router.get('/connect/:username', function(req, res, next) {
 
 router.get('/disconnect/:username', function(req, res, next) {
     console.log(req.params.username + " est déconnecté");
-    disconnectClient(req.params.username);
+    instancesList[req.params.username].quit();
+    delete instancesList[req.params.username];
     res.redirect('/');
 });
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-    getClients(function(clients){
-        clients.forEach(function (element, index) {
-            /*
-            if (clientsList[element['username']] != null) {
-              //console.log(clientsList[element['username']]);
-              clients[index]['online'] = clientsList[element['username']].client.protocolState === 'play';
-              console.log(clients[index]['online'])
-            }
-            */
-
-        });
-        //console.log(clients);
-        res.render('index', { title: 'Express' , clients});
-    });
+    for(var i in clients){
+        if (instancesList[clients[i].username]) {
+            clients[i].online = true;
+        }
+        else
+            clients[i].online = false;
+    }
+    console.log()
+    res.render('index', { title: 'Express' , clients});
 });
 
 module.exports = router;
