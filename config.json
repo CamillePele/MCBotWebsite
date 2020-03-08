@@ -1,7 +1,7 @@
 {
-  "password": "",
+  "password": "your password",
   "server": {
-    "ip": "optimis.lcmc.pro",
-    "port": "25565"
+    "ip": "server ip",
+    "port": 25565
   }
 }

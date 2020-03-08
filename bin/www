@@ -4,8 +4,6 @@
  * Module dependencies.
  */
 
-var minecraft = require('../minecraft');
-
 var app = require('../app');
 var debug = require('debug')('mcbotwebsite:server');
 var http = require('http');

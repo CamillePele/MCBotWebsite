@@ -1,23 +1,23 @@
 const mc = require('minecraft-protocol');
+var fs = require('fs');
+
+let rawdata = fs.readFileSync('config.json');
+const config = JSON.parse(rawdata);
+
+const ip = config['server']['ip'];
+const port = config['server']['port'];
 
 class MinecraftClient{
     constructor(username, mail, password) {
         this.username = username;
         this.mail = mail;
         this.password = password;
-        /*
-        this.client = mc.createClient({
-            username: this.mail, // email and password are required only for
-            password: this.password,
-        });
-
-         */
     }
 
     connect(){
         this.client = mc.createClient({
-            host: "optimis.lcmc.pro",   // optional
-            port: 25565,         // optional
+            host: ip,   // optional
+            port: port,         // optional
             username: this.mail, // email and password are required only for
             password: this.password,
         });
@@ -30,7 +30,7 @@ class MinecraftClient{
         this.client.write("chat", { message: text });
     }
 
-    sleeep(){
+    sleep(){
         this.client.end("sleep");
         setTimeout(function () {
             this.connect()
@@ -52,5 +52,3 @@ class MinecraftClient{
 }
 
 module.exports = MinecraftClient;
-
-//var Kams = new MinecraftClient("KaKams", "sacrificed-soul@hotmail.com", "wxcv1234");
